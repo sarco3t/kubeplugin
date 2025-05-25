@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Define command-line arguments
+
+RESOURCE_TYPE=$1
+NAMESPACE=$2
+
+# Set default value for NAMESPACE if it's empty
+if [ -z "$NAMESPACE" ]; then
+  NAMESPACE="kube-system"
+fi
+
+if [ -z "$RESOURCE_TYPE" ]; then
+  echo "Usage: $0 <resource-type> [namespace]"
+  echo "Example: $0 pods my-namespace"
+  exit 1
+fi
+# Retrieve resource usage statistics from Kubernetes
+kubectl top $RESOURCE_TYPE -n $NAMESPACE --no-headers | while read line
+do
+  # Extract CPU and memory usage from the output
+  NAME=$(echo $line | awk '{print $1}')
+  CPU=$(echo $line | awk '{print $2}')
+  MEMORY=$(echo $line | awk '{print $3}')
+
+  # "Resource, Namespace, Name, CPU, Memory"
+  echo "$RESOURCE_TYPE, $NAMESPACE, $NAME, $CPU, $MEMORY"
+done
+    
